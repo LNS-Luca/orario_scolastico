@@ -1,7 +1,47 @@
+html {
+    height: 100%; /* Necessario per min-height: 100% su body */
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f8f9fa; /* Grigio chiaro Bootstrap */
-    padding-top: 70px; /* Per navbar fissa */
+    background-color: #f8f9fa;
+    padding-top: 70px; /* Spazio per navbar fissa, solo quando visibile */
+    display: flex; /* Per footer fisso */
+    flex-direction: column; /* Per footer fisso */
+    min-height: 100%; /* Per footer fisso */
+}
+
+main {
+    flex: 1 0 auto; /* Permette al main di crescere e occupare lo spazio disponibile */
+    width: 100%; /* Assicura che main prenda tutta la larghezza */
+}
+
+footer {
+    flex-shrink: 0; /* Impedisce al footer di restringersi */
+    width: 100%; /* Assicura che il footer prenda tutta la larghezza */
+}
+
+
+/* Schermata di Benvenuto */
+.welcome-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Sfondo semi-trasparente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050; /* Sopra la navbar se fosse già visibile */
+    padding-top: 0; /* Sovrascrive il padding-top del body */
+}
+
+.welcome-content {
+    background-color: white;
+    border-radius: 0.5rem;
+    width: 90%;
+    max-width: 500px; /* Limita larghezza su schermi grandi */
 }
 
 .navbar {
@@ -18,6 +58,8 @@ body {
 
 .nav-link.active {
     font-weight: bold;
+    color: #fff !important; /* Evidenzia il link attivo nella navbar scura */
+    border-bottom: 2px solid #fff;
 }
 
 .nav-link i, .btn i {
@@ -25,7 +67,7 @@ body {
 }
 
 h2 {
-    color: #343a40; /* Grigio scuro Bootstrap */
+    color: #343a40;
     margin-bottom: 1.5rem;
 }
 
@@ -37,14 +79,14 @@ h2 {
 }
 
 #timetable-display th, #timetable-display td {
-    border: 1px solid #dee2e6; /* Grigio chiaro Bootstrap per bordi */
+    border: 1px solid #dee2e6;
     padding: 0.75rem;
     text-align: center;
     vertical-align: middle;
 }
 
 #timetable-display th {
-    background-color: #e9ecef; /* Grigio molto chiaro Bootstrap per header tabella */
+    background-color: #e9ecef;
     font-weight: 600;
     color: #495057;
 }
@@ -52,11 +94,11 @@ h2 {
 #timetable-display .interval-cell {
     background-color: #f0f0f0;
     font-style: italic;
-    color: #6c757d; /* Grigio medio Bootstrap */
+    color: #6c757d;
 }
 
 #timetable-display .subject-cell {
-    cursor: default; /* O pointer se si vuole aggiungere interazione */
+    cursor: default;
     transition: background-color 0.2s ease-in-out;
 }
 
@@ -65,14 +107,13 @@ h2 {
 }
 
 #timetable-display .highlight {
-    background-color: #ffe082 !important; /* Giallo chiaro per evidenziare */
+    background-color: #ffe082 !important;
     font-weight: bold;
 }
 
 #timetable-display .hidden-row {
     display: none;
 }
-
 
 /* Sezioni */
 .hidden-section {
@@ -113,7 +154,7 @@ h2 {
 }
 #my-timetables-list .list-group-item strong {
     cursor: pointer;
-    color: #0d6efd; /* Blu Bootstrap per link */
+    color: #0d6efd;
 }
 #my-timetables-list .list-group-item strong:hover {
     text-decoration: underline;
@@ -121,16 +162,24 @@ h2 {
 
 /* Responsive */
 @media (max-width: 768px) {
+    body {
+        padding-top: 56px; /* Altezza navbar su mobile */
+    }
     #timetable-display th, #timetable-display td {
         padding: 0.5rem;
         font-size: 0.85rem;
     }
     #search-input {
         width: 100%;
-        margin-top: 0.5rem;
     }
     .navbar-nav {
         text-align: center;
+    }
+    .welcome-content {
+        padding: 1.5rem !important;
+    }
+    .welcome-content h1 {
+        font-size: 1.75rem;
     }
 }
 
@@ -140,6 +189,6 @@ h2 {
         font-size: 0.75rem;
     }
      #timetable-display .fascia-oraria {
-        display: none; /* Nasconde la fascia oraria testuale su schermi piccoli */
+        display: none;
     }
 }
