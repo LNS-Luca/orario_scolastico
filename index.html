@@ -9,7 +9,20 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+
+    <div id="welcome-screen" class="welcome-overlay">
+        <div class="welcome-content card p-4 shadow-lg">
+            <h1 class="mb-4 text-primary text-center">Benvenuto!</h1>
+            <p class="text-center mb-4">Scegli un'opzione per iniziare:</p>
+            <div class="d-grid gap-3">
+                <button id="welcome-orario-3e" class="btn btn-primary btn-lg"><i class="bi bi-table"></i> Visualizza Orario 3E</button>
+                <button id="welcome-crea-orario" class="btn btn-success btn-lg"><i class="bi bi-plus-circle"></i> Crea Nuovo Orario</button>
+                <button id="welcome-miei-orari" class="btn btn-info btn-lg text-white"><i class="bi bi-list-ul"></i> Visualizza I Miei Orari</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" id="main-navbar" style="display: none;">
         <div class="container-fluid">
             <a class="navbar-brand" href="#"><i class="bi bi-calendar3"></i> Orario Scolastico</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,7 +31,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#" id="nav-orario-3e"><i class="bi bi-table"></i> Orario 3E</a>
+                        <a class="nav-link" href="#" id="nav-orario-3e"><i class="bi bi-table"></i> Orario 3E</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" id="nav-crea-orario"><i class="bi bi-plus-circle"></i> Crea Nuovo Orario</a>
@@ -31,10 +44,10 @@
         </div>
     </nav>
 
-    <main class="container mt-5 pt-5">
-        <section id="sezione-visualizzazione-orario" class="active-section">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 id="current-timetable-title">Orario 3E</h2>
+    <main class="container mt-4 pt-5 mb-5">
+        <section id="sezione-visualizzazione-orario" class="hidden-section">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+                <h2 id="current-timetable-title" class="mb-3 mb-md-0">Orario 3E</h2>
                 <div class="col-md-5 col-lg-4">
                     <input type="search" id="search-input" class="form-control" placeholder="Cerca materia, giorno, ora...">
                 </div>
@@ -64,10 +77,9 @@
         </section>
     </main>
 
-    <footer class="bg-light text-center text-lg-start mt-5">
+    <footer class="bg-light text-center text-lg-start mt-auto">
         <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
-            © 2025 Orario Scolastico Dinamico
-        </div>
+            © 2025 LNS_Luca </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
