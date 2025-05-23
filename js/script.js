@@ -3,9 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
     const currentTimetableTitle = document.getElementById('current-timetable-title');
 
+    const mainNavbar = document.getElementById('main-navbar');
     const navOrario3E = document.getElementById('nav-orario-3e');
     const navCreaOrario = document.getElementById('nav-crea-orario');
     const navMieiOrari = document.getElementById('nav-miei-orari');
+    const allNavLinks = document.querySelectorAll('#main-navbar .nav-link');
+
 
     const sezioneVisualizzazione = document.getElementById('sezione-visualizzazione-orario');
     const sezioneCreaOrario = document.getElementById('sezione-crea-orario');
@@ -19,11 +22,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const myTimetablesListDisplay = document.getElementById('my-timetables-list');
 
-    let currentDisplayedTimetableData = null; // Per la ricerca
+    // Elementi Schermata Benvenuto
+    const welcomeScreen = document.getElementById('welcome-screen');
+    const welcomeBtnOrario3E = document.getElementById('welcome-orario-3e');
+    const welcomeBtnCreaOrario = document.getElementById('welcome-crea-orario');
+    const welcomeBtnMieiOrari = document.getElementById('welcome-miei-orari');
+
+    let currentDisplayedTimetableData = null;
+
+    // --- Gestione Schermata Iniziale ---
+    function hideWelcomeScreenAndShowApp() {
+        welcomeScreen.style.display = 'none';
+        mainNavbar.style.display = 'flex'; // Mostra la navbar principale
+        document.body.style.paddingTop = '70px'; // Ripristina padding per navbar fissa
+    }
+
+    // Controlla sessionStorage per vedere se l'utente ha già superato la welcome screen
+    if (sessionStorage.getItem('welcomeScreenDismissed')) {
+        hideWelcomeScreenAndShowApp();
+        // Carica l'ultimo stato o l'orario 3E di default
+        // Per semplicità, carichiamo l'orario 3E se non c'è altra logica di stato
+        displayTimetable(orario3E);
+        setActiveSection(sezioneVisualizzazione);
+        setActiveNavLink(navOrario3E);
+    } else {
+        document.body.style.paddingTop = '0'; // Rimuovi padding per la welcome screen
+    }
+
+
+    welcomeBtnOrario3E.addEventListener('click', () => {
+        hideWelcomeScreenAndShowApp();
+        sessionStorage.setItem('welcomeScreenDismissed', 'true');
+        displayTimetable(orario3E);
+        setActiveSection(sezioneVisualizzazione);
+        setActiveNavLink(navOrario3E);
+    });
+
+    welcomeBtnCreaOrario.addEventListener('click', () => {
+        hideWelcomeScreenAndShowApp();
+        sessionStorage.setItem('welcomeScreenDismissed', 'true');
+        prepareCreateTimetableForm();
+        setActiveSection(sezioneCreaOrario);
+        setActiveNavLink(navCreaOrario);
+    });
+
+    welcomeBtnMieiOrari.addEventListener('click', () => {
+        hideWelcomeScreenAndShowApp();
+        sessionStorage.setItem('welcomeScreenDismissed', 'true');
+        loadAndDisplayMyTimetables();
+        setActiveSection(sezioneMieiOrari);
+        setActiveNavLink(navMieiOrari);
+    });
+
 
     // --- Funzioni di Navigazione ---
+    function setActiveNavLink(activeLink) {
+        allNavLinks.forEach(link => link.classList.remove('active'));
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+    }
+    
     function setActiveSection(sectionToShow) {
         allSections.forEach(section => {
+            section.style.display = (section.id === sectionToShow.id) ? 'block' : 'none';
             if (section.id === sectionToShow.id) {
                 section.classList.add('active-section');
                 section.classList.remove('hidden-section');
@@ -32,50 +94,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 section.classList.remove('active-section');
             }
         });
-        // Aggiorna link attivi navbar
-        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-        if (sectionToShow === sezioneVisualizzazione) {
-            if (currentDisplayedTimetableData && currentDisplayedTimetableData.nome === orario3E.nome) {
-                navOrario3E.classList.add('active');
-            }
-        } else if (sectionToShow === sezioneCreaOrario) {
-            navCreaOrario.classList.add('active');
-        } else if (sectionToShow === sezioneMieiOrari) {
-            navMieiOrari.classList.add('active');
-        }
     }
 
     navOrario3E.addEventListener('click', (e) => {
         e.preventDefault();
         displayTimetable(orario3E);
         setActiveSection(sezioneVisualizzazione);
-        navOrario3E.classList.add('active');
-        searchInput.value = ''; // Resetta la ricerca
+        setActiveNavLink(navOrario3E);
+        searchInput.value = '';
     });
 
     navCreaOrario.addEventListener('click', (e) => {
         e.preventDefault();
         prepareCreateTimetableForm();
         setActiveSection(sezioneCreaOrario);
+        setActiveNavLink(navCreaOrario);
     });
     
     cancelCreateBtn.addEventListener('click', () => {
-        displayTimetable(orario3E); // Torna all'orario 3E
+        displayTimetable(orario3E);
         setActiveSection(sezioneVisualizzazione);
-        navOrario3E.classList.add('active');
+        setActiveNavLink(navOrario3E);
     });
 
     navMieiOrari.addEventListener('click', (e) => {
         e.preventDefault();
         loadAndDisplayMyTimetables();
         setActiveSection(sezioneMieiOrari);
+        setActiveNavLink(navMieiOrari);
     });
 
     // --- Funzioni di Visualizzazione Orario ---
     function renderTimetable(timetableData) {
-        currentDisplayedTimetableData = timetableData; // Salva per la ricerca
+        currentDisplayedTimetableData = timetableData;
         currentTimetableTitle.textContent = timetableData.nome || "Orario";
-        timetableDisplay.innerHTML = ''; // Pulisce la visualizzazione precedente
+        timetableDisplay.innerHTML = '';
 
         if (!timetableData || !timetableData.giorni) {
             timetableDisplay.innerHTML = '<p class="text-danger">Dati orario non validi o mancanti.</p>';
@@ -85,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const table = document.createElement('table');
         table.className = 'table table-bordered table-hover';
 
-        // Header: Fasce orarie
         const thead = table.createTHead();
         const headerRow = thead.insertRow();
         const thDay = document.createElement('th');
@@ -105,56 +157,49 @@ document.addEventListener('DOMContentLoaded', () => {
             headerRow.appendChild(th);
         });
 
-        // Body: Giorni e Materie
         const tbody = table.createTBody();
         giorniSettimana.forEach(giorno => {
             const row = tbody.insertRow();
-            row.dataset.day = giorno; // Per la ricerca
+            row.dataset.day = giorno;
             const cellGiorno = row.insertCell();
             cellGiorno.textContent = giorno;
             cellGiorno.scope = "row";
             cellGiorno.style.fontWeight = "bold";
 
             const lezioniDelGiorno = timetableData.giorni[giorno] || [];
-            let lezioneIdx = 0;
-
+            
             fasceOrarieDef.forEach(fascia => {
                 const cell = row.insertCell();
                 if (fascia.isInterval) {
                     cell.textContent = "Intervallo";
                     cell.classList.add('interval-cell');
-                    cell.colSpan = 1; // Assicurati che l'intervallo occupi una colonna
                 } else {
-                    // Trova la lezione per questa fascia oraria specifica
                     const lezioneCorrispondente = lezioniDelGiorno.find(l => l.ora === fascia.oraLabel);
                     if (lezioneCorrispondente) {
                         cell.textContent = lezioneCorrispondente.materia;
                         cell.dataset.subject = lezioneCorrispondente.materia;
-                        cell.dataset.hour = fascia.oraLabel;
-                        cell.dataset.time = fascia.inizio + " - " + fascia.fine;
+                        cell.dataset.hour = fascia.oraLabel; // Es. "1ª"
+                        cell.dataset.hourNumeric = fascia.oraLabel.replace('ª', ''); // Es. "1"
+                        cell.dataset.time = `${fascia.inizio} - ${fascia.fine}`;
                         cell.classList.add('subject-cell');
                     } else {
-                        // Cella vuota se non c'è lezione (es. 7a ora non per tutti i giorni)
                         cell.textContent = '-';
                         cell.dataset.hour = fascia.oraLabel;
-                         cell.dataset.time = fascia.inizio + " - " + fascia.fine;
+                        cell.dataset.hourNumeric = fascia.oraLabel.replace('ª', '');
+                        cell.dataset.time = `${fascia.inizio} - ${fascia.fine}`;
                     }
                 }
             });
         });
 
         timetableDisplay.appendChild(table);
-        applySearchFilter(); // Applica filtro se c'è già del testo nella search bar
+        applySearchFilter();
     }
     
     function displayTimetable(timetableData) {
         renderTimetable(timetableData);
-        setActiveSection(sezioneVisualizzazione);
-        // Aggiorna il link attivo della navbar
-        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-        if (timetableData.nome === orario3E.nome) {
-            navOrario3E.classList.add('active');
-        }
+        // Non chiamare setActiveSection e setActiveNavLink qui,
+        // perché viene già fatto dai gestori di eventi della navbar o della welcome screen.
     }
 
     // --- Funzionalità di Ricerca/Filtro ---
@@ -164,32 +209,47 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchTerm = searchInput.value.toLowerCase().trim();
         const rows = timetableDisplay.querySelectorAll('tbody tr');
 
+        // Modifica per la ricerca dell'ora: "1 ora" -> "1"
+        let searchHourNumber = null;
+        const hourSearchMatch = searchTerm.match(/^(\d+)\s*ora$/); // Es. "1 ora", "2ora"
+        if (hourSearchMatch) {
+            searchHourNumber = hourSearchMatch[1]; // Es. "1"
+        }
+
         rows.forEach(row => {
             let rowVisible = false;
             if (!searchTerm) {
-                rowVisible = true; // Mostra tutte le righe se la ricerca è vuota
-                row.querySelectorAll('td.subject-cell').forEach(cell => cell.classList.remove('highlight'));
+                rowVisible = true;
+                row.querySelectorAll('td.subject-cell, td:not(.interval-cell):not([scope="row"])').forEach(cell => cell.classList.remove('highlight'));
             } else {
                 const day = row.dataset.day.toLowerCase();
                 if (day.includes(searchTerm)) {
                     rowVisible = true;
                 }
 
-                const cells = row.querySelectorAll('td.subject-cell');
+                const cells = row.querySelectorAll('td.subject-cell, td:not(.interval-cell):not([scope="row"])'); // Includi celle vuote per ora/fascia
                 cells.forEach(cell => {
-                    cell.classList.remove('highlight'); // Rimuovi evidenziazione precedente
+                    cell.classList.remove('highlight');
                     const subject = cell.dataset.subject ? cell.dataset.subject.toLowerCase() : '';
-                    const hour = cell.dataset.hour ? cell.dataset.hour.toLowerCase() : '';
+                    const hourLabel = cell.dataset.hour ? cell.dataset.hour.toLowerCase() : ''; // "1ª"
+                    const hourNumeric = cell.dataset.hourNumeric ? cell.dataset.hourNumeric.toLowerCase() : ''; // "1"
                     const time = cell.dataset.time ? cell.dataset.time.toLowerCase() : '';
                     
                     let cellMatches = false;
-                    if (subject.includes(searchTerm) || hour.includes(searchTerm) || time.includes(searchTerm)) {
+                    if (subject.includes(searchTerm) || hourLabel.includes(searchTerm) || time.includes(searchTerm)) {
                         cellMatches = true;
-                        rowVisible = true; // Se una cella matcha, la riga è visibile
+                    }
+                    // Controllo aggiuntivo per "N ora"
+                    if (searchHourNumber && hourNumeric === searchHourNumber) {
+                         cellMatches = true;
                     }
 
-                    if (cellMatches && searchTerm) { // Evidenzia solo se c'è un termine di ricerca
-                        cell.classList.add('highlight');
+
+                    if (cellMatches) {
+                        rowVisible = true;
+                        if(cell.classList.contains('subject-cell') || cell.textContent !== '-') { // Evidenzia solo se c'è contenuto o è una cella materia
+                           cell.classList.add('highlight');
+                        }
                     }
                 });
             }
@@ -199,8 +259,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Funzionalità "Crea Nuovo Orario" ---
     function prepareCreateTimetableForm() {
-        newTimetableNameInput.value = ''; // Pulisci nome
-        timetableCreationGrid.innerHTML = ''; // Pulisci griglia precedente
+        newTimetableNameInput.value = '';
+        timetableCreationGrid.innerHTML = '';
 
         const table = document.createElement('table');
         table.className = 'table table-bordered';
@@ -210,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
         thDay.textContent = 'Giorno';
         headerRow.appendChild(thDay);
 
-        fasceOrarieDef.filter(f => !f.isInterval).forEach(fascia => { // Solo ore di lezione, no intervallo
+        fasceOrarieDef.filter(f => !f.isInterval).forEach(fascia => {
             const th = document.createElement('th');
             th.innerHTML = `${fascia.oraLabel}<br><small>${fascia.inizio} - ${fascia.fine}</small>`;
             headerRow.appendChild(th);
@@ -223,22 +283,15 @@ document.addEventListener('DOMContentLoaded', () => {
             cellGiorno.textContent = giorno;
             cellGiorno.style.fontWeight = "bold";
 
-            fasceOrarieDef.filter(f => !f.isInterval).forEach((fascia, index) => {
+            fasceOrarieDef.filter(f => !f.isInterval).forEach((fascia) => {
                 const cell = row.insertCell();
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.className = 'form-control form-control-sm';
                 input.dataset.day = giorno;
-                input.dataset.hourIndex = index; // Usa l'indice della fascia oraria (senza intervallo)
                 input.dataset.oraLabel = fascia.oraLabel;
                 input.dataset.fasciaOraria = `${fascia.inizio} - ${fascia.fine}`;
-                // La 7a ora è speciale (indice 6 dopo aver filtrato l'intervallo)
-                if (giorno !== "Giovedì" && fascia.oraLabel === "7ª") {
-                     input.placeholder = "-"; // Opzionale
-                     // input.disabled = true; // Potresti disabilitarla se non è Giovedì
-                } else {
-                    input.placeholder = `Materia ${fascia.oraLabel}`;
-                }
+                input.placeholder = `Materia ${fascia.oraLabel}`; // Placeholder per tutte le ore, inclusa la 7ª
                 cell.appendChild(input);
             });
         });
@@ -263,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const inputsForDay = timetableCreationGrid.querySelectorAll(`input[data-day="${giorno}"]`);
             inputsForDay.forEach(input => {
                 const materia = input.value.trim();
-                if (materia) { // Salva solo se c'è una materia inserita
+                if (materia) {
                     newTimetableData.giorni[giorno].push({
                         ora: input.dataset.oraLabel,
                         fasciaOraria: input.dataset.fasciaOraria,
@@ -275,8 +328,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         saveTimetableToLocalStorage(timetableName, newTimetableData);
         alert(`Orario "${timetableName}" salvato con successo!`);
-        displayTimetable(newTimetableData); // Mostra il nuovo orario
-        navMieiOrari.click(); // Vai alla lista per vederlo aggiunto
+        // Dopo il salvataggio, visualizza l'orario appena creato
+        displayTimetable(newTimetableData);
+        setActiveSection(sezioneVisualizzazione); // Mostra la sezione di visualizzazione
+        setActiveNavLink(null); // Nessun link specifico attivo o potresti attivare "I miei orari"
+        // Per coerenza, potremmo reindirizzare a "I miei orari" per vederlo nella lista
+        navMieiOrari.click();
     });
 
 
@@ -299,21 +356,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        return timetables;
+        return timetables.sort((a,b) => a.nome.localeCompare(b.nome)); // Ordina per nome
     }
 
     function deleteTimetableFromLocalStorage(name) {
         localStorage.removeItem(TIMETABLE_STORAGE_KEY_PREFIX + name);
-        loadAndDisplayMyTimetables(); // Ricarica la lista
-        // Se l'orario cancellato era quello visualizzato, torna a 3E
+        loadAndDisplayMyTimetables(); 
         if (currentDisplayedTimetableData && currentDisplayedTimetableData.nome === name) {
-            displayTimetable(orario3E);
-             navOrario3E.classList.add('active');
+             if (welcomeScreen.style.display === 'none') { // Solo se la app è già avviata
+                displayTimetable(orario3E);
+                setActiveSection(sezioneVisualizzazione);
+                setActiveNavLink(navOrario3E);
+            }
         }
     }
 
     function loadAndDisplayMyTimetables() {
-        myTimetablesListDisplay.innerHTML = ''; // Pulisci lista
+        myTimetablesListDisplay.innerHTML = '';
         const savedTimetables = loadTimetablesFromLocalStorage();
 
         if (savedTimetables.length === 0) {
@@ -327,16 +386,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const nameSpan = document.createElement('strong');
             nameSpan.textContent = timetable.nome;
-            nameSpan.style.cursor = 'pointer';
-            nameSpan.style.color = '#0d6efd';
             nameSpan.addEventListener('click', () => {
                 displayTimetable(timetable);
-                searchInput.value = ''; // Resetta ricerca
+                setActiveSection(sezioneVisualizzazione);
+                setActiveNavLink(null); // L'orario visualizzato non è uno dei default della navbar
+                searchInput.value = '';
             });
 
             const deleteButton = document.createElement('button');
             deleteButton.className = 'btn btn-danger btn-sm';
-            deleteButton.innerHTML = '<i class="bi bi-trash"></i> Elimina';
+            deleteButton.innerHTML = '<i class="bi bi-trash"></i>'; // Solo icona per compattezza
+            deleteButton.setAttribute('aria-label', `Elimina orario ${timetable.nome}`);
             deleteButton.addEventListener('click', () => {
                 if (confirm(`Sei sicuro di voler eliminare l'orario "${timetable.nome}"?`)) {
                     deleteTimetableFromLocalStorage(timetable.nome);
@@ -348,9 +408,6 @@ document.addEventListener('DOMContentLoaded', () => {
             myTimetablesListDisplay.appendChild(listItem);
         });
     }
-
-    // --- Inizializzazione ---
-    displayTimetable(orario3E); // Mostra orario 3E all'avvio
-    setActiveSection(sezioneVisualizzazione); // Imposta sezione visualizzazione come attiva
-    navOrario3E.classList.add('active'); // Imposta link navbar attivo
+    // Non c'è un'inizializzazione esplicita qui perché la welcome screen gestisce il primo avvio.
+    // Se la welcome screen è già stata scartata (sessionStorage), la logica all'inizio gestisce il caricamento.
 });
